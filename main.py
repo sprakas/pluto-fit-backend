@@ -1,8 +1,9 @@
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 from auth.google import router as google_auth_router
+from modules.users.user_controller import router as user_router
 
-app = FastAPI()
+app = FastAPI(title="Pluto Fit Backend API", version="1.0.0")
 
 app.add_middleware(
     CORSMiddleware,
@@ -13,3 +14,8 @@ app.add_middleware(
 )
 
 app.include_router(google_auth_router)
+app.include_router(
+    prefix="/v1/user",
+    tags=["Users"],
+    router=user_router
+)

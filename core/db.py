@@ -1,6 +1,6 @@
 from pymongo import MongoClient
 import certifi
-from config import MONGO_DB_NAME, MONGO_URI
+from core.config import MONGO_DB_NAME, MONGO_URI
 
 client = MongoClient(MONGO_URI, tls=True, tlsCAFile=certifi.where())
 

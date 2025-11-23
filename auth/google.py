@@ -1,10 +1,12 @@
+from core.jwt import create_jwt_token
 from fastapi import APIRouter, HTTPException
+from modules.users.user_entity import user_entity
 from pydantic import BaseModel
 import requests
 from jose import jwt
 import time
-from config import GOOGLE_CLIENT_ID, JWT_SECRET
-from db import users
+from core.config import GOOGLE_CLIENT_ID, JWT_SECRET
+from core.db import users
 from fastapi import Header
 
 router = APIRouter()
@@ -61,11 +63,7 @@ async def google_login(request: Token):
         picture = user.get("picture")
        
     # 3. Create app JWT for session
-    app_token = jwt.encode(
-        {"email": email, "exp": time.time() + 86400},  # 24 hours expiration
-        JWT_SECRET,
-        algorithm="HS256"
-    )
+    app_token = create_jwt_token(email=email)
 
     return {
         "id": user_id,
@@ -87,12 +85,7 @@ async def get_current_user(Authorization: str = Header(...)):
         user = users.find_one({"email": email})
         if not user:
             raise HTTPException(status_code=404, detail="User not found")
-        return {
-            "id": str(user["_id"]),
-            "email": user.get("email"),
-            "name": user.get("name"),
-            "picture": user.get("picture"),
-            "is_new_user": False
-        }
+        return user_entity(user)
+            
     except jwt.JWTError:
         raise HTTPException(status_code=401, detail="Invalid token")
