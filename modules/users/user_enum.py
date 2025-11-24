@@ -1,6 +1,6 @@
 from enum import Enum
 
-class PrimaryGoalEnum(str, Enum):
+class FitnessGoalEnum(str, Enum):
     BUILD_MUSCLE = "BUILD_MUSCLE"
     LOSE_WEIGHT = "LOSE_WEIGHT"
     MAINTAIN_FITNESS = "MAINTAIN_FITNESS"

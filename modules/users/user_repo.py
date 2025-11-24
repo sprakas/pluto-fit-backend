@@ -35,10 +35,10 @@ class UserRepository:
         results = [user_entity(u) for u in cursor]
         return results, total
 
-    def update(self, email: str, update_data: dict):
-        users.update_one({"email": email}, {"$set": update_data})
-        return self.find_by_email(email)
+    def update(self, id: str, update_data: dict):
+        users.update_one({"_id": ObjectId(id)}, {"$set": update_data})
+        return self.find_by_id(id)
 
-    def delete(self, email: str):
-        result = users.delete_one({"email": email})
+    def delete(self, id: str):
+        result = users.delete_one({"_id": ObjectId(id)})
         return result.deleted_count > 0

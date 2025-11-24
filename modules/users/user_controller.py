@@ -1,9 +1,10 @@
 from fastapi import APIRouter, Depends
-from modules.users.user_schema import UserCreateSchema, UserResponseSchema, PaginatedUsersResponse
+from modules.users.user_schema import UserCreateSchema, UserResponseSchema, PaginatedUsersResponse, UserUpdateSchema
 from modules.users.user_service import UserService
 from fastapi import Query
 from typing import Optional
 from core.jwt import verify_jwt_token
+from fastapi import Body
 
 router = APIRouter(dependencies=[Depends(verify_jwt_token)])
 service = UserService()
@@ -39,10 +40,12 @@ def get_user(id: str):
     return service.get_user(id)
 
 
-@router.put("")
-def update_user(id: str, updates: dict):
-    return service.update_user(id, updates)
 
-@router.delete("")
+@router.put("/{id}", response_model=UserResponseSchema)
+def update_user(id: str, updates: UserUpdateSchema = Body(...)):
+    updated_user = service.update_user(id, updates.model_dump(exclude_unset=True))
+    return updated_user
+
+@router.delete("/{id}")
 def delete_user(id: str):
     return service.delete_user(id)

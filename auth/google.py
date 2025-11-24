@@ -2,7 +2,7 @@ from core.jwt import create_jwt_token
 from fastapi import APIRouter, HTTPException
 from modules.users.user_entity import user_entity
 from pydantic import BaseModel
-import requests
+import httpx
 from jose import jwt
 import time
 from core.config import GOOGLE_CLIENT_ID, JWT_SECRET
@@ -20,10 +20,11 @@ async def google_login(request: Token):
     token = request.token
 
     # 1. Verify access token with Google
-    r = requests.get(
-        "https://www.googleapis.com/oauth2/v3/tokeninfo",
-        params={"access_token": token},
-    )
+    async with httpx.AsyncClient() as client:
+        r = await client.get(
+            "https://www.googleapis.com/oauth2/v3/tokeninfo",
+            params={"access_token": token},
+        )
     if r.status_code != 200:
         raise HTTPException(status_code=401, detail="Invalid access token")
 
@@ -43,7 +44,8 @@ async def google_login(request: Token):
     if not user:
         # Fetch profile from userinfo endpoint only for new users
         headers = {"Authorization": f"Bearer {token}"}
-        profile_res = requests.get("https://www.googleapis.com/oauth2/v3/userinfo", headers=headers)
+        async with httpx.AsyncClient() as client:
+            profile_res = await client.get("https://www.googleapis.com/oauth2/v3/userinfo", headers=headers)
         if profile_res.status_code != 200:
             raise HTTPException(status_code=400, detail="Failed to fetch profile info")
         profile = profile_res.json()
