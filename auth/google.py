@@ -57,24 +57,14 @@ async def google_login(request: Token):
             "picture": picture,
             "created_at": time.time()
         })
-        user_id = str(result.inserted_id)
-    else:
-        # Use existing user info
-        user_id = str(user["_id"])
-        name = user.get("name")
-        picture = user.get("picture")
+        user = users.find_one({"_id": result.inserted_id})
        
     # 3. Create app JWT for session
     app_token = create_jwt_token(email=email)
 
-    return {
-        "id": user_id,
-        "access_token": app_token,
-        "email": email,
-        "name": name,
-        "picture": picture,
-        "is_new_user": user is None
-    }
+    response = user_entity(user)
+    response["access_token"] = app_token
+    return response
 
 @router.get("/api/me")
 async def get_current_user(Authorization: str = Header(...)):
